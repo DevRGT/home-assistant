@@ -10,8 +10,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
-from email.mime.base import MIMEBase
-from email import encoders
 import email.utils
 
 import os
@@ -260,14 +258,11 @@ def _build_html_msg(text, html, images, attachments_files):
         name = os.path.basename(atch_name)
         try:
             with open(atch_name, 'rb') as attachment_file:
-                attachment = open(attachment_file,'rb')
-                part = MIMEBase('application','octet-stream')
-                part.set_payload((attachment).read())
-                encoders.encode_base64(part)
-                part.add_header('Content-Disposition',"attachment; filename= "+name)
-                #attachment = MIMEImage(attachment_file.read(), filename=name)
-            msg.attach(part)
-            #attachment.add_header('Content-ID', '<{}>'.format(name))
+                ##attachment = MIMEImage(attachment_file.read(), filename=name)
+                attachment = MIMEApplication(attachment_file.read(), filename=name)
+            msg.attach(attachment)
+            ##attachment.add_header('Content-ID', '<{}>'.format(name))
+            attachment.add_header('Content-Disposition',"attachment; filename= ".format(name))
         except FileNotFoundError:
             _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
                             atch_name, atch_num)
