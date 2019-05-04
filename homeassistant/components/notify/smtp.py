@@ -229,6 +229,19 @@ def _build_multipart_msg(message, images, attachments_files):
         except FileNotFoundError:
             _LOGGER.warning("Attachment %s not found. Skipping", atch_name)
 
+    for atch_num, atch_name in enumerate(files):
+        name = os.path.basename(atch_name)
+        try:
+            with open(atch_name, 'rb') as attachment_file:
+                ##attachment = MIMEImage(attachment_file.read(), filename=name)
+                attachment = MIMEApplication(attachment_file.read(), filename=name)
+            msg.attach(attachment)
+            ##attachment.add_header('Content-ID', '<{}>'.format(name))
+            attachment.add_header('Content-Disposition',"attachment; filename= ".format(name))
+        except FileNotFoundError:
+            _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
+                            atch_name, atch_num)
+            
     body_html = MIMEText(''.join(body_text), 'html')
     msg_alt.attach(body_html)
     return msg
