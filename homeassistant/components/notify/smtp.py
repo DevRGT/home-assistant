@@ -208,39 +208,44 @@ def _build_multipart_msg(message, images, attachments_files):
     msg_alt.attach(body_txt)
     body_text = ['<p>{}</p><br>'.format(message)]
 
-    for atch_num, atch_name in enumerate(images):
-        cid = 'image{}'.format(atch_num)
-        body_text.append('<img src="cid:{}"><br>'.format(cid))
-        try:
-            with open(atch_name, 'rb') as attachment_file:
-                file_bytes = attachment_file.read()
-                try:
-                    attachment = MIMEImage(file_bytes)
-                    msg.attach(attachment)
-                    attachment.add_header('Content-ID', '<{}>'.format(cid))
-                except TypeError:
-                    _LOGGER.warning("Attachment %s has an unknown MIME type. "
-                                    "Falling back to file", atch_name)
-                    attachment = MIMEApplication(file_bytes, Name=atch_name)
-                    attachment['Content-Disposition'] = ('attachment; '
-                                                         'filename="%s"' %
-                                                         atch_name)
-                    msg.attach(attachment)
-        except FileNotFoundError:
-            _LOGGER.warning("Attachment %s not found. Skipping", atch_name)
+    try:
+        for atch_num, atch_name in enumerate(images):
+            cid = 'image{}'.format(atch_num)
+            body_text.append('<img src="cid:{}"><br>'.format(cid))
+            try:
+                with open(atch_name, 'rb') as attachment_file:
+                    file_bytes = attachment_file.read()
+                    try:
+                        attachment = MIMEImage(file_bytes)
+                        msg.attach(attachment)
+                        attachment.add_header('Content-ID', '<{}>'.format(cid))
+                    except TypeError:
+                        _LOGGER.warning("Attachment %s has an unknown MIME type. "
+                                        "Falling back to file", atch_name)
+                        attachment = MIMEApplication(file_bytes, Name=atch_name)
+                        attachment['Content-Disposition'] = ('attachment; '
+                                                             'filename="%s"' %
+                                                             atch_name)
+                        msg.attach(attachment)
+            except FileNotFoundError:
+                _LOGGER.warning("Attachment %s not found. Skipping", atch_name)
+    except TypeError:
+        _LOGGER.warning("There is no images")
 
-    for atch_num, atch_name in enumerate(files):
-        name = os.path.basename(atch_name)
-        try:
-            with open(atch_name, 'rb') as attachment_file:
-                ##attachment = MIMEImage(attachment_file.read(), filename=name)
-                attachment = MIMEApplication(attachment_file.read(), filename=name)
-            msg.attach(attachment)
-            ##attachment.add_header('Content-ID', '<{}>'.format(name))
-            attachment.add_header('Content-Disposition',"attachment; filename= ".format(name))
-        except FileNotFoundError:
-            _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
-                            atch_name, atch_num)
+    try:
+        for atch_num, atch_name in enumerate(attachments_files):
+            name = os.path.basename(atch_name)
+            try:
+                with open(atch_name, 'rb') as attachment_file:
+                    ##attachment = MIMEImage(attachment_file.read(), filename=name)
+                    attachment = MIMEApplication(attachment_file.read(), filename=name)
+                msg.attach(attachment)
+                attachment.add_header('Content-Disposition','attachment', filename=format(name))
+            except FileNotFoundError:
+                _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
+                                atch_name, atch_num)           
+    except TypeError:
+        _LOGGER.warning("There is no file attachement")
             
     body_html = MIMEText(''.join(body_text), 'html')
     msg_alt.attach(body_html)
@@ -256,27 +261,33 @@ def _build_html_msg(text, html, images, attachments_files):
     alternative.attach(MIMEText(html, ATTR_HTML, _charset='utf-8'))
     msg.attach(alternative)
 
-    for atch_num, atch_name in enumerate(images):
-        name = os.path.basename(atch_name)
-        try:
-            with open(atch_name, 'rb') as attachment_file:
-                attachment = MIMEImage(attachment_file.read(), filename=name)
-            msg.attach(attachment)
-            attachment.add_header('Content-ID', '<{}>'.format(name))
-        except FileNotFoundError:
-            _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
-                            atch_name, atch_num)
+    try:
+        for atch_num, atch_name in enumerate(images):
+            name = os.path.basename(atch_name)
+            try:
+                with open(atch_name, 'rb') as attachment_file:
+                    attachment = MIMEImage(attachment_file.read(), filename=name)
+                msg.attach(attachment)
+                attachment.add_header('Content-ID', '<{}>'.format(name))
+            except FileNotFoundError:
+                _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
+                                atch_name, atch_num)
+    except TypeError:
+        _LOGGER.warning("There are no images")
 
-    for atch_num, atch_name in enumerate(files):
-        name = os.path.basename(atch_name)
-        try:
-            with open(atch_name, 'rb') as attachment_file:
-                ##attachment = MIMEImage(attachment_file.read(), filename=name)
-                attachment = MIMEApplication(attachment_file.read(), filename=name)
-            msg.attach(attachment)
-            ##attachment.add_header('Content-ID', '<{}>'.format(name))
-            attachment.add_header('Content-Disposition',"attachment; filename= ".format(name))
-        except FileNotFoundError:
-            _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
-                            atch_name, atch_num)
+    try:
+        for atch_num, atch_name in enumerate(attachments_files):
+            name = os.path.basename(atch_name)
+            try:
+                with open(atch_name, 'rb') as attachment_file:
+                    ##attachment = MIMEImage(attachment_file.read(), filename=name)
+                    attachment = MIMEApplication(attachment_file.read(), filename=name)
+                msg.attach(attachment)
+                attachment.add_header('Content-Disposition','attachment', filename=format(name))
+            except FileNotFoundError:
+                _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
+                                atch_name, atch_num)
+    except TypeError:
+        _LOGGER.warning("There are no attachements")
+ 
     return msg
