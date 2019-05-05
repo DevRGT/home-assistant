@@ -230,7 +230,7 @@ def _build_multipart_msg(message, images, attachments_files):
             except FileNotFoundError:
                 _LOGGER.warning("Attachment %s not found. Skipping", atch_name)
     except TypeError:
-        _LOGGER.warning("There is no images")
+        _LOGGER.info("There is no images")
 
     try:
         for atch_num, atch_name in enumerate(attachments_files):
@@ -245,7 +245,7 @@ def _build_multipart_msg(message, images, attachments_files):
                 _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
                                 atch_name, atch_num)           
     except TypeError:
-        _LOGGER.warning("There is no file attachement")
+        _LOGGER.info("There is no file attachement")
             
     body_html = MIMEText(''.join(body_text), 'html')
     msg_alt.attach(body_html)
@@ -273,7 +273,7 @@ def _build_html_msg(text, html, images, attachments_files):
                 _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
                                 atch_name, atch_num)
     except TypeError:
-        _LOGGER.warning("There are no images")
+        _LOGGER.info("There are no images")
 
     try:
         for atch_num, atch_name in enumerate(attachments_files):
@@ -288,6 +288,6 @@ def _build_html_msg(text, html, images, attachments_files):
                 _LOGGER.warning("Attachment %s [#%s] not found. Skipping",
                                 atch_name, atch_num)
     except TypeError:
-        _LOGGER.warning("There are no attachements")
+        _LOGGER.info("There are no attachements")
  
     return msg
